@@ -8,6 +8,8 @@ Automated data collection and statistical analysis system for SportyBet's **Spor
 
 📄 **[Read the full findings →](FINDINGS.md)**
 
+📄 **[April 2026 addendum: algorithm reverse-engineering & WebSocket probe →](ADDENDUM_2026-04.md)**
+
 ## Key Results
 
 | Analysis | Result |
