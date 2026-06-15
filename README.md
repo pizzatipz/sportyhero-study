@@ -1,14 +1,18 @@
 # Sporty Hero — Crash Game RNG Study
 
-> **Status**: ✅ Study Complete  
-> **Rounds analyzed**: 1,008  
-> **Key finding**: ~10.7% house edge, no exploitable patterns  
+> **Status**: ✅ Study Complete (three rounds of investigation)  
+> **Rounds analyzed**: 1,008 behavioural + **10,000 ground-truth seeds**  
+> **Key finding**: provably-fair **3% house edge**, no exploitable patterns — confirmed down to the seed generator  
 
-Automated data collection and statistical analysis system for SportyBet's **Sporty Hero** crash/multiplier game. This study empirically determines whether the crash multiplier distribution exhibits any detectable statistical structure.
+Automated data collection and statistical analysis system for SportyBet's **Sporty Hero** crash/multiplier game. This study empirically determines whether the crash multiplier distribution exhibits any detectable, exploitable statistical structure. The answer, across three independent angles of attack, is **no**.
 
-📄 **[Read the full findings →](FINDINGS.md)**
+📄 **[Read the full findings →](FINDINGS.md)** (March 2026 — behavioural study, 1,008 rounds)
 
 📄 **[April 2026 addendum: algorithm reverse-engineering & WebSocket probe →](ADDENDUM_2026-04.md)**
+
+📄 **[June 2026 addendum II: 10k-seed PRNG audit & the "hourly pattern" thesis →](SEED_AUDIT_2026-06.md)**
+
+> **House-edge correction:** the original behavioural study reported ~10.7%. Ground-truth seeds reveal that was a scraper artifact from over-counting the 1.00x instant-bust point mass. The true rule is `houseCoefficient = max(1.00, round(0.97·2³²/(2³²−decimal), 2))` — a **3% edge** with a 3.48% instant-bust point mass. See the [June 2026 addendum](SEED_AUDIT_2026-06.md).
 
 ## Key Results
 
@@ -52,7 +56,15 @@ Browser (Chromium) ──▸ Playwright Bot ──▸ SQLite DB ──▸ Analys
 | `src/analyze.py` | Statistical analysis + pattern detection (5 analyses) |
 | `src/deep_analyze.py` | Comprehensive 15-dimension deep analysis |
 | `src/strategies.py` | Cashout strategy backtesting (5 strategies) |
+| `scripts/sh_seed_collect.py` | Resumable, integrity-checking 48-bit seed backfiller (threaded) |
+| `scripts/sh_seed_audit.py` | serverSeed PRNG audit: uniformity, NIST, time-seeding, LCG/LFSR recovery |
+| `scripts/sh_temporal.py` | Hourly-pattern thesis: dispersion, Fano, duration coupling, exploitability |
+| `scripts/sh_strategy_sim.py` | Strategy reality-check: money-management session outcomes |
+| `scripts/sh_daily_sim.py` | Strategy reality-check: "hit a daily target, quit, repeat" |
+| `scripts/sh_adaptive_fast.py` | Strategy reality-check: adaptive trend-trading vs shuffled control |
+| `scripts/nist.py` | NIST SP 800-22 core randomness battery (validated) |
 | `FINDINGS.md` | Full research findings with charts and conclusions |
+| `SEED_AUDIT_2026-06.md` | June 2026 addendum: 10k-seed PRNG audit & hourly-pattern resolution |
 
 ## Quick Start
 

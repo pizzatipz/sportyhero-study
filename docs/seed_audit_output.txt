@@ -1,0 +1,102 @@
+﻿Loaded 10000 rounds (ids 6691690..6701689)
+
+==============================================================================
+0. INTEGRITY RECAP + HOUSE-EDGE CONFIRMATION
+==============================================================================
+rounds              : 10000
+hash-verified       : 10000/10000 (100.00%)
+instant-bust (1.00x): 349 (3.490%)   theoretical = 3.483% (=1-0.97/1.005)
+  binomial p vs theory: 0.9565
+mean multiplier     : 8.843x   median = 1.93x
+
+House-edge check  P(crash>=X)*X  (theory = 0.97 for all X):
+  X=   1.5  P(>=X)=64.710%  P*X=0.9707  (theory 64.667%)
+  X=   2.0  P(>=X)=48.280%  P*X=0.9656  (theory 48.500%)
+  X=   5.0  P(>=X)=19.490%  P*X=0.9745  (theory 19.400%)
+  X=  10.0  P(>=X)= 9.430%  P*X=0.9430  (theory  9.700%)
+  X=  20.0  P(>=X)= 4.600%  P*X=0.9200  (theory  4.850%)
+  X=  50.0  P(>=X)= 1.980%  P*X=0.9900  (theory  1.940%)
+  X= 100.0  P(>=X)= 0.970%  P*X=0.9700  (theory  0.970%)
+
+==============================================================================
+1. SEED UNIFORMITY (48-bit operator commitment)
+==============================================================================
+hex-digit chi-square (overall, 120000 chars): chi2=15.7 p=0.4049
+per-position hex chi-square: 0/12 positions flag at p<0.01 (expect ~0)
+per-bit balance: 1/48 bits flag at p<0.01 (expect ~0). worst bit#19: 5134/10000 ones, p=0.0076
+48-bit int KS vs Uniform(0,1): D=0.0050 p=0.9656
+
+==============================================================================
+2. COLLISIONS / ENTROPY
+==============================================================================
+unique seeds   : 10000/10000
+duplicates     : 0   (birthday expectation in 2^48 ~ 0.0000)
+
+==============================================================================
+3. SEQUENTIAL STRUCTURE (is seed[i+1] predictable from history?)
+==============================================================================
+autocorrelation lags 1-30: 2 exceed +/-0.0196 (expect ~1.5 false positives)
+    lag 13: r=-0.0220
+    lag 24: r=+0.0219
+lag-1 Spearman rho=+0.0069 p=0.4931
+lag-1 Pearson   r =+0.0069 p=0.4913
+successive diff mod 2^48: mean=50.23% of range (expect ~50%), std=29.12%
+  near-constant/counter check: 3 diffs within 0.01% of 0 (counter/LCG tell; expect ~0)
+Ljung-Box(10) on seed sequence: Q=8.75 p=0.5563
+  [saved docs/seed_sequential.png]
+
+==============================================================================
+4. TIME-SEEDING (does the clock predict the seed?)
+==============================================================================
+window: 10000 rounds spanning 51.9 h
+seed    vs time : Spearman rho=-0.0026 p=0.7950  95%CI[-0.023,+0.017]
+CONTROL decimal vs time : rho=+0.0197 p=0.0483  (SHA-512 output; MUST be ~0 if methodology is clean)
+split-half seed-vs-time: first=+0.0216 second=+0.0203 (real effect => same sign & magnitude in both)
+seed vs ms-of-day   : circ|r|=0.0190  (control decimal=0.0095)
+seed vs ms-of-hour  : circ|r|=0.0035  (control decimal=0.0120)
+seed vs ms-of-minute: circ|r|=0.0022  (control decimal=0.0119)
+MI(hour-of-day ; seed top-4-bits)=0.0196 nats  shuffled-baseline=0.0175  excess=+0.0021
+
+==============================================================================
+5. NIST SP 800-22 CORE BATTERY
+==============================================================================
+serverSeed bitstream: 480000 bits (= 10000 x 48)
+  monobit                        p=0.2051
+  block_frequency(M=128)         p=0.9265
+  runs                           p=0.2101
+  longest_run_ones               p=0.3241
+  binary_matrix_rank(32x32)      p=0.7177
+  dft_spectral                   p=0.4994
+  serial_1(m=12)                 p=0.2050
+  serial_2(m=12)                 p=0.0892
+  approximate_entropy(m=10)      p=0.5577
+  cusum_forward                  p=0.1853
+  cusum_backward                 p=0.2347
+
+  -> 0 test(s) flag at p<0.01 (11 run; ~0.11 expected by chance)
+  [control] SHA-512 decimal bitstream (320000 bits): 0 flags (sanity: hash output should pass)
+
+==============================================================================
+6. PRNG RECOVERY ATTEMPTS
+==============================================================================
+monotonic check: 4977 up / 5022 down steps (counter would be ~all one direction)
+LCG recovery: not an LCG (modulus gcd=1, predictions -/-)
+linear complexity (Berlekamp-Massey on first 4000 bits): L=1999 (expect ~2000; a small fixed L => LFSR/xorshift)
+
+==============================================================================
+7. CLIENT-SEED DEPENDENCY (second barrier to exploitation)
+==============================================================================
+bettors/round: min=3 mean=3.00 max=3
+note: outcome hash mixes ALL bettors' clientSeeds (revealed post-round).
+      Even a predicted serverSeed needs the full ordered clientSeed set,
+      so single-seed prediction is necessary but NOT sufficient to bet.
+
+==============================================================================
+VERDICT
+==============================================================================
+No exploitable structure in the serverSeed sequence.
+The 48-bit operator commitment behaves as a CSPRNG draw:
+uniform, collision-free, serially independent, clock-independent,
+passes NIST, and is not an LCG/LFSR. No prediction is possible.
+
+[summary JSON -> C:\Users\eatpizzanot\Clones\copilot-worktrees\sportyhero-study\eatpizzanot-crispy-system\data\seed_audit_summary.json]

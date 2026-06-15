@@ -1,0 +1,113 @@
+﻿Loaded 10000 rounds spanning 51.9 h (ids 6691690..6701689)
+
+==============================================================================
+1. PER-HOUR BAND COUNTS + DISPERSION (is the hourly count 'guaranteed'?)
+==============================================================================
+clock-hours covered: 53 (using 51 full hours)
+avg rounds/full-hour: 192.6 (min 179, max 206)
+
+   band  mean/hr   D=V/M binom(1-p)   perm 95% range  perm p  interpretation
+   >=2x    92.98   0.282      0.517 [ 0.41, 0.91]      0.001  MORE regular than chance
+   >=5x    37.59   0.442      0.805 [ 0.55, 1.20]      0.008  MORE regular than chance
+  >=10x    18.20   0.578      0.906 [ 0.60, 1.32]      0.036  MORE regular than chance
+  >=20x     8.84   0.816      0.954 [ 0.63, 1.40]      0.458  consistent w/ random timing
+  >=50x     3.80   0.694      0.980 [ 0.65, 1.42]      0.108  consistent w/ random timing
+ >=100x     1.88   0.949      0.990 [ 0.65, 1.42]      0.962  consistent w/ random timing
+
+Reading: D<1 is EXPECTED (fixed ~190 rounds/hr => Binomial, D~=1-p).
+The permutation null already bakes that in; only D below the perm 95%
+range (small perm p) would indicate exploitable hourly regularity.
+
+==============================================================================
+1b. ROUND-WINDOW FANO FACTOR (artifact-free control: is the SEQUENCE iid?)
+==============================================================================
+Fixed-size ROUND windows remove wall-clock bucketing entirely.
+  band     w   F_obs   iid_F       iid 1-99%  p(low)
+  >=2x    20   0.505   0.517 [ 0.45, 0.60]   0.371
+  >=2x    50   0.535   0.519 [ 0.41, 0.64]   0.637
+  >=2x   190   0.520   0.520 [ 0.31, 0.79]   0.533
+  >=5x    20   0.802   0.805 [ 0.70, 0.93]   0.491
+  >=5x    50   0.856   0.804 [ 0.63, 1.00]   0.752
+  >=5x   190   0.728   0.802 [ 0.49, 1.22]   0.355
+ >=10x    20   0.946   0.906 [ 0.78, 1.04]   0.768
+ >=10x    50   0.922   0.904 [ 0.71, 1.12]   0.585
+ >=10x   190   0.951   0.906 [ 0.55, 1.37]   0.636
+
+-> 0 window(s) under-dispersed vs iid. The pure round sequence
+   matches iid Bernoulli at every scale: NO structure in the sequence.
+
+==============================================================================
+1c. MULTIPLIER -> DURATION COUPLING (why clock-hours look 'regular')
+==============================================================================
+Spearman(multiplier, round duration) = +1.000 (p=0.0e+00)
+mean round duration by band:
+       [1,1.01) n=  349  mean_dur=  9.06s
+        [1.5,2) n= 1643  mean_dur= 14.43s
+          [2,5) n= 2878  mean_dur= 19.85s
+         [5,10) n= 1006  mean_dur= 28.15s
+        [10,50) n=  745  mean_dur= 37.87s
+           >=50 n=  198  mean_dur= 57.85s
+
+Duration grows monotonically with the multiplier, so a fixed wall-clock
+hour holds fewer rounds when multipliers run high. THAT time-budget makes
+per-clock-hour counts self-regulate (under-dispersed) -- a pure timing
+consequence, not predictive structure.
+
+==============================================================================
+2. WAITING-TIME / 'DUE' TEST (are big multipliers ever overdue?)
+==============================================================================
+>= 5x: hits=1949 p=0.1949 mean_gap=5.1 (geom exp=5.1) chi2vsGeom p=0.921
+        hazard slope=-0.00067 (p=0.676); flat => memoryless, no 'due' effect
+>= 10x: hits=943 p=0.0943 mean_gap=10.6 (geom exp=10.6) chi2vsGeom p=0.362
+        hazard slope=-0.00052 (p=0.325); flat => memoryless, no 'due' effect
+        [saved docs/hazard.png]
+>= 20x: hits=460 p=0.0460 mean_gap=21.7 (geom exp=21.7) chi2vsGeom p=0.009  <-- FLAG
+        hazard slope=-0.00010 (p=0.480); flat => memoryless, no 'due' effect
+
+==============================================================================
+3. TIME-OF-DAY EFFECT (does P(>=X) depend on the clock hour?)
+==============================================================================
+span: 2.2 days (>=2 needed for a fair time-of-day read)
+>= 2x vs hour-of-day: chi2=20.8 p=0.5955  (no time-of-day effect)
+>= 10x vs hour-of-day: chi2=17.4 p=0.7911  (no time-of-day effect)
+
+==============================================================================
+4. PERIODICITY (any scheduled cycle in the multipliers?)
+==============================================================================
+FFT on log-multiplier (10000 rounds): dominant period=3.4 rounds, power/mean=9.0, false-alarm p=0.472  (no significant cycle)
+Lomb-Scargle on >=10x indicator: top period=987s power=0.001 (normalized; ~1 would be a strong cycle)
+  [saved docs/periodogram.png]
+
+==============================================================================
+5. WITHIN-HOUR POSITION OF BIG MULTIPLIERS
+==============================================================================
+>= 10x (943 hits) minute-of-hour uniformity: chi2=52.8 p=0.7018  (uniform; no preferred minute)
+>= 50x (198 hits) minute-of-hour uniformity: chi2=63.7 p=0.3136  (uniform; no preferred minute)
+
+==============================================================================
+6. DIRECT EXPLOITABILITY (does a hot/cold start change the next round?)
+==============================================================================
+>= 2x (baseline 0.4828): after HOT start P=0.4843 (n=4514), after COLD P=0.4829; hot delta=+0.0015 p=0.846
+>= 5x (baseline 0.1949): after HOT start P=0.1936 (n=4787), after COLD P=0.1951; hot delta=-0.0013 p=0.841
+
+Deltas ~0 and large p => the next round is NOT predictable from the
+running hourly count. The clock-hour regularity is not bettable.
+
+==============================================================================
+VERDICT (hourly-pattern thesis)
+==============================================================================
+Your hourly-frequency observation is REAL -- per-CLOCK-HOUR counts of
+common multipliers are even MORE regular than chance (under-dispersed:
+bands [2, 5]). But this is fully explained, not exploitable:
+  - round duration is a perfect function of the multiplier (Spearman=+1.00),
+    so a fixed clock-hour budgets fewer rounds when multipliers run high
+    -> per-hour counts self-regulate. It's a timing artifact.
+  - the pure ROUND sequence is iid at every window (Fano = iid):
+    no structure in the sequence itself.
+  - a hot/cold running hourly count does NOT shift the next round's
+    probability: there is nothing to bet on.
+
+VERDICT: no exploitable temporal pattern. Knowing the recent history
+(or the hour's running tally) does not improve a bet on the next round.
+
+[summary JSON -> C:\Users\eatpizzanot\Clones\copilot-worktrees\sportyhero-study\eatpizzanot-crispy-system\data\temporal_summary.json]
