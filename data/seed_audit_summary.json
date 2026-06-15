@@ -1,0 +1,64 @@
+{
+  "n": 10000,
+  "verified": 10000,
+  "bust_rate": 0.0349,
+  "bust_p_vs_3pct": 0.9564984469403068,
+  "mean_multiplier": 8.842544,
+  "uniformity": {
+    "hex_chi2_p": 0.4049095793133677,
+    "perpos_flags": 0,
+    "perbit_flags": 1,
+    "int_ks_p": 0.9655834617602388
+  },
+  "collisions": {
+    "unique": 10000,
+    "dups": 0,
+    "expected": 1.7761792037163104e-07
+  },
+  "sequential": {
+    "acf_significant": 2,
+    "lag1_spearman_p": 0.4931014920418107,
+    "lag1_pearson_p": 0.49133134676866547,
+    "ljungbox10_p": 0.5563107304697581,
+    "counter_diffs": 3
+  },
+  "time_seeding": {
+    "seed_vs_time_rho": -0.0025986529339865295,
+    "seed_vs_time_p": 0.7949924040736288,
+    "control_decimal_rho": 0.019745202569452027,
+    "control_decimal_p": 0.04832879127581711,
+    "split_half": [
+      0.021573047230921884,
+      0.020259061194362445
+    ],
+    "mi_excess": 0.002068103204035023,
+    "likely_artifact": true
+  },
+  "nist_seed_fails": 0,
+  "nist_control_fails": 0,
+  "nist_detail": {
+    "monobit": 0.20505381634926,
+    "block_frequency(M=128)": 0.9264940587030549,
+    "runs": 0.21005182146855494,
+    "longest_run_ones": 0.32412268643021874,
+    "binary_matrix_rank(32x32)": 0.7177234634032027,
+    "dft_spectral": 0.4993508461861319,
+    "serial_1(m=12)": 0.20503917767023885,
+    "serial_2(m=12)": 0.08922865541914886,
+    "approximate_entropy(m=10)": 0.5577346294713688,
+    "cusum_forward": 0.18531808771743483,
+    "cusum_backward": 0.2346626733027225
+  },
+  "recovery": {
+    "lcg_recovered": false,
+    "lcg_modulus": 1,
+    "linear_complexity": 1999,
+    "lc_prefix": 4000,
+    "lfsr_suspected": false
+  },
+  "clientseeds": {
+    "min": 3,
+    "mean": 3.0,
+    "max": 3
+  }
+}
