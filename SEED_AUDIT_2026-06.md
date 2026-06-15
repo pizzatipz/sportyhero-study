@@ -31,6 +31,7 @@ fronts the prior work left open:
 | Is the 48-bit serverSeed weak/predictable? | **No.** Uniform (KS p=0.97), 0 collisions, serially independent (Ljung-Box p=0.56), clock-independent, **passes all 11 NIST SP 800-22 core tests**, not an LCG, not an LFSR (linear complexity = n/2) |
 | Are hourly multiplier counts "guaranteed"? | **Yes — even more regular than chance** (per clock-hour, ≥2x & ≥5x are *under-dispersed*, perm p = 0.001 / 0.008) |
 | …so is *that* exploitable? | **No.** It is a timing artifact: round duration is a perfect function of the multiplier (Spearman = **+1.000**), so a fixed clock-hour self-limits big multipliers. The pure round **sequence is iid at every scale**, and a hot/cold hourly tally does **not** shift the next round (Δ≈0, p≈0.85) |
+| Can money management / daily targets / adaptive trend-trading win? | **No.** All reshape variance, not the mean. "Quit-while-ahead" wins 67% of days but P(net up) → 0.5% over a year; adaptive trend-switching can't even tell real data from shuffled noise (z=−0.28). Every approach averages −3% |
 | Net | **No exploit.** The game is fair-as-advertised; the "pattern" you can see is unbettable by construction |
 
 ---
@@ -173,7 +174,69 @@ information about *which* round will be big.
 
 ---
 
-## 4. Why none of this is exploitable
+## 4. Part C — can active or adaptive play beat the edge? (`scripts/sh_strategy_sim.py`, `sh_daily_sim.py`, `sh_adaptive_fast.py`)
+
+A natural objection: "I don't bet mechanically — I use money management, set daily
+targets and quit while ahead, and I read trends and switch strategies." Each of
+these was simulated against the 10,000 real rounds (rounds are iid, so bootstrap
+resampling is valid). All three reshape the *distribution* of outcomes; none move
+the *mean* above zero.
+
+### 4.1 Money management (`sh_strategy_sim.py`)
+
+20,000 bootstrapped sessions, start 100,000, goal 1,000,000 (10×):
+
+| Strategy | P(reach 1M) | P(bust) | mean ROI |
+|---|---|---|---|
+| flat @ 2x | 0.0% | 53% | −65% |
+| martingale @ 2x | 0.0% | 91% | −50% |
+| **anti-martingale "let it ride" @ 2x** | **6.9%** | **93%** | **−26%** |
+
+A 100k→1M run **is** achievable (~1 in 14 "let it ride" sessions) — so a big
+winning session is real, not a fluke. But the same strategy busts 93% of the time
+and averages −26%. Money management buys a better lottery ticket, not an edge.
+
+### 4.2 "Hit a daily target, quit, repeat" (`sh_daily_sim.py`)
+
+The optional-stopping question. Daily buy-in, play the "let it ride" style until a
+daily profit target, then stop — repeated over many days:
+
+| Plan | win-rate/day | P(net up) @100d | P(net up) @365d | mean net @365d |
+|---|---|---|---|---|
+| modest +20%/day | 67% | 9.2% | **0.5%** | **−3,140,000** |
+| +50% / −50% daily | 34% | 12.3% | 1.5% | −2,632,000 |
+
+You win most *days* (which is why the plan feels like it works), but **P(net up)
+collapses toward zero as days accumulate** and cumulative P&L trends sharply
+negative. No stopping rule beats a negative-EV game (optional stopping theorem) —
+it only delays and concentrates the loss into rare catastrophic days.
+
+### 4.3 Adaptive "read trends, ride them, switch" (`sh_adaptive_fast.py`)
+
+The strongest version: a follow-the-leading-expert controller over a panel of
+pattern experts (fixed targets + mean-reversion/"due" + momentum) that bets
+whatever has worked recently and switches when it stops. The decisive test runs
+the **same** strategy on the real order vs. on shuffled orders (outcomes
+identical, sequence destroyed):
+
+| | mean ROI per bet |
+|---|---|
+| REAL order | −3.29% |
+| SHUFFLED (mean of 500) | −3.05% (±0.86%) |
+
+**z = −0.28** — the real sequence beats only 37% of shuffles, i.e. the adaptive
+strategy **cannot distinguish real game data from order-destroyed noise.** Every
+expert is negative even when cherry-picked in hindsight (best: 5x target at
+−2.55%); "momentum" / trend-riding was the *worst* at −3.94%. The "patterns" a
+discretionary player rides are the random clustering that always exists in iid
+data; they "die" because they were never predictive.
+
+**Part C verdict:** active, staged, and adaptive play all lose at the same −3%.
+Independence is a *global* property — it defeats every history-based method at once.
+
+---
+
+## 5. Why none of this is exploitable
 
 1. **Per-round independence.** Outcomes are SHA-512 hashes of an iid serverSeed and
    the bettors' clientSeeds. History — including the hour's running tally — does not
@@ -190,7 +253,7 @@ information about *which* round will be big.
 
 ---
 
-## 5. Verdict
+## 6. Verdict
 
 > **The deeper dig is done.** With 10,000 integrity-checked ground-truth rounds we
 > audited the last unexamined surface — the 48-bit serverSeed generator — with a
@@ -204,7 +267,7 @@ information about *which* round will be big.
 
 ---
 
-## 6. Reproduce
+## 7. Reproduce
 
 ```bash
 pip install -r requirements.txt        # numpy, scipy, statsmodels, matplotlib
@@ -218,14 +281,22 @@ python scripts/sh_seed_audit.py
 
 # 3. test the hourly-pattern thesis (dispersion, Fano, duration, exploitability)
 python scripts/sh_temporal.py
+
+# 4. strategy reality-check (money management, daily targets, adaptive trading)
+python scripts/sh_strategy_sim.py
+python scripts/sh_daily_sim.py
+python scripts/sh_adaptive_fast.py
 ```
 
-## 7. Files added
+## 8. Files added
 
 ```
 scripts/sh_seed_collect.py   — resumable, integrity-checking seed backfiller (threaded)
 scripts/sh_seed_audit.py     — Part A: 48-bit serverSeed PRNG audit
 scripts/sh_temporal.py       — Part B: hourly-thesis / temporal pattern tests
+scripts/sh_strategy_sim.py   — Part C: money-management session outcomes
+scripts/sh_daily_sim.py      — Part C: 'hit a daily target, quit, repeat' over many days
+scripts/sh_adaptive_fast.py  — Part C: adaptive 'read trends & switch' vs shuffled control
 scripts/sh_validate.py       — methodology check: permutation test calibration + outcome iid
 scripts/nist.py              — NIST SP 800-22 core battery (validated)
 data/sh_seeds_10k.jsonl      — 10,000 ground-truth rounds (seeds + multipliers + times)

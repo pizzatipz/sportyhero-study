@@ -59,6 +59,9 @@ Browser (Chromium) ──▸ Playwright Bot ──▸ SQLite DB ──▸ Analys
 | `scripts/sh_seed_collect.py` | Resumable, integrity-checking 48-bit seed backfiller (threaded) |
 | `scripts/sh_seed_audit.py` | serverSeed PRNG audit: uniformity, NIST, time-seeding, LCG/LFSR recovery |
 | `scripts/sh_temporal.py` | Hourly-pattern thesis: dispersion, Fano, duration coupling, exploitability |
+| `scripts/sh_strategy_sim.py` | Strategy reality-check: money-management session outcomes |
+| `scripts/sh_daily_sim.py` | Strategy reality-check: "hit a daily target, quit, repeat" |
+| `scripts/sh_adaptive_fast.py` | Strategy reality-check: adaptive trend-trading vs shuffled control |
 | `scripts/nist.py` | NIST SP 800-22 core randomness battery (validated) |
 | `FINDINGS.md` | Full research findings with charts and conclusions |
 | `SEED_AUDIT_2026-06.md` | June 2026 addendum: 10k-seed PRNG audit & hourly-pattern resolution |
